@@ -1,18 +1,13 @@
-// get the client
-import mysql  from'mysql2';
 
-// create the connection to database
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  database: 'jwt'
-});
+import userService from '../service/userService'
 
 const handleHelloWord = (req,res)=>{
   return res.render("home.ejs")
 }
-const handleUserPage = (req ,res)=>{
-    return res.render("user.ejs")
+const handleUserPage = async(req ,res)=>{
+ let userList=await userService.getUserList();
+   await userService.deleteUser(5)
+    return res.render("user.ejs",{userList})
 }
 
 const handleCreateNewUser=(req,res)=>{
@@ -20,17 +15,17 @@ const handleCreateNewUser=(req,res)=>{
     let password = req.body.password;
     let username =req.body.username;
 
-   
+    
+   userService.createNewUser(email,password,username)
 
-    connection.query(
-        ' INSERT INTO users (email,password,username) VALUES (?,?,?)',[email,password,username],
-        function(err, results, fields) {
-            if(err){
-                console.log(err)
-            }
-        }
-      );
-    return res.send("loc")
+   
+    return res.redirect("/user")
 }
-module.exports= {handleHelloWord,handleUserPage,handleCreateNewUser
+const handleDelteUser=async(req,res)=>{
+  console.log("check id",req.params.id)
+
+  await userService.deleteUser(req.params.id);
+  return res.redirect("/user")
+}
+module.exports= {handleHelloWord,handleUserPage,handleCreateNewUser,handleDelteUser
 }
